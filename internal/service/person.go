@@ -39,7 +39,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	var gender,nationality string
 
 	chCnt := 0
-	to := time.After(5 * time.Second)
+	t := time.NewTimer(5 * time.Second)
 
 	go func(){
 		age,_ := ps.AgifySvc.MakeRequest(name)
@@ -66,7 +66,7 @@ loop:
 			case nationality = <- nationalityCh:
 				log.Info(nationality)
 				chCnt++
-			case <- to:
+			case <- t.C:
 				return errors.New("Timeout")
 			default:
 				if chCnt == 3{
