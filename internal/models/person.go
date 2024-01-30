@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"regexp"
+	"fmt"
 )
 
 type Person struct {
@@ -16,6 +17,7 @@ type Person struct {
 }
 
 func (p *Person) Validate() error {
+	fmt.Println(p)
 	found, _ := regexp.MatchString("^[a-zA-Z]+$",p.Name)
 	if !found {
 		return errors.New("Set correct name")

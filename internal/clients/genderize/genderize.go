@@ -2,7 +2,7 @@ package genderize
 
 import (
 	"api/internal/helpers"
-	"encoding/json"
+	"github.com/goccy/go-json"
 )
 
 type Genderize struct {

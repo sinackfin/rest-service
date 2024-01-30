@@ -26,7 +26,7 @@ func New(ps *service.PersonService) *Handler{
 		api.GET("/person",h.GetPersonByID)
 		api.PATCH("/person/:id",h.UpdatePerson)
 		api.DELETE("/person/:id",h.DeletePersonByID)
-		api.POST("/person/",h.CreatePerson)
+		api.POST("/person",h.CreatePerson)
 	}
 	h.HTTPHandler 	= router
 	h.PersonService = ps

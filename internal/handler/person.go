@@ -58,14 +58,19 @@ func (h *Handler) DeletePersonByID(c *gin.Context){
 }
 
 func (h *Handler) UpdatePerson(c *gin.Context){
-	updated_person 	:= models.Person{}
-	if err := c.BindJSON(&updated_person); err != nil {
+	persondID := c.Param("id")
+	updated_person, err := h.PersonService.GetPerson(persondID)
+	if err != nil {
 		log.Error(err)
 		ResponseErrorJSON(c,err)
 		return
 	}
-	updated_person.ID = c.Param("id")
-	if err := h.PersonService.UpdatePerson(&updated_person); err != nil {
+	if err := c.BindJSON(updated_person); err != nil {
+		log.Error(err)
+		ResponseErrorJSON(c,err)
+		return
+	}
+	if err := h.PersonService.UpdatePerson(updated_person); err != nil {
 		log.Error(err)
 		ResponseErrorJSON(c,err)
 		return
