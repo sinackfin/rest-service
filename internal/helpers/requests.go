@@ -3,6 +3,7 @@ package httpsender
 import (
 	"io/ioutil"
 	"net/http"
+	"context"
 )
 
 type HTTPSender struct {
@@ -17,9 +18,9 @@ func New(url string) *HTTPSender {
 	}
 }
 
-func (h *HTTPSender)SendRequestWithParams(params map[string]string) error{
+func (h *HTTPSender)SendRequestWithParams(ctx context.Context,params map[string]string) error{
 	client := &http.Client{}
-	req, err := http.NewRequest(http.MethodGet, h.baseURL, nil)
+	req, err := http.NewRequestWithContext(ctx,http.MethodGet, h.baseURL, nil)
 	
 	if err != nil {
 		return err

@@ -4,6 +4,7 @@ import (
 	"api/internal/helpers"
 	"github.com/goccy/go-json"
 	"errors"
+	"context"
 )
 
 type AgifyResponse struct {
@@ -22,12 +23,12 @@ func New(url string) *Agify {
 	}
 }
 
-func (a *Agify) MakeRequest(name string) (int,error){
+func (a *Agify) MakeRequest(ctx context.Context, name string) (int,error){
 	httpSender := httpsender.New(a.URL)
 	params := map[string]string{
 		"name": name,
 	}
-	if err := httpSender.SendRequestWithParams(params); err != nil {
+	if err := httpSender.SendRequestWithParams(ctx,params); err != nil {
 		return 0,err
 	}
 	if httpSender.ResCode < 200 || httpSender.ResCode >= 400 {

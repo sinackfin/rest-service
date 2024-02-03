@@ -43,7 +43,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	ctx,cancel := context.WithTimeout(ps.ctx,time.Second * 5)
 
 	go func(){
-		age,err := ps.AgifySvc.MakeRequest(name)
+		age,err := ps.AgifySvc.MakeRequest(ctx,name)
 		if err != nil {
 			log.Error(err)
 			cancel()
@@ -52,7 +52,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	}()
 
 	go func(){
-		gender,err := ps.GenderizeSvc.MakeRequest(name)
+		gender,err := ps.GenderizeSvc.MakeRequest(ctx,name)
 		if err != nil {
 			log.Error(err)
 			cancel()
@@ -60,7 +60,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 		genderCh <- gender
 	}()
 	go func(){
-		nationality,err := ps.NationalizeSvc.MakeRequest(name)
+		nationality,err := ps.NationalizeSvc.MakeRequest(ctx,name)
 		if err != nil {
 			log.Error(err)
 			cancel()

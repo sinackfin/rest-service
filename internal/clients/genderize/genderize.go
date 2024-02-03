@@ -4,6 +4,7 @@ import (
 	"api/internal/helpers"
 	"github.com/goccy/go-json"
 	"errors"
+	"context"
 )
 
 type Genderize struct {
@@ -23,12 +24,12 @@ func New(url string) *Genderize {
 	}
 }
 
-func (g *Genderize) MakeRequest(name string) (string,error){
+func (g *Genderize) MakeRequest(ctx context.Context, name string) (string,error){
 	httpSender := httpsender.New(g.URL)
 	params := map[string]string{
 		"name": name,
 	}
-	if err := httpSender.SendRequestWithParams(params); err != nil {
+	if err := httpSender.SendRequestWithParams(ctx,params); err != nil {
 		return "",err
 	}
 	if httpSender.ResCode < 200 || httpSender.ResCode >= 400 {
