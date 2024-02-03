@@ -39,34 +39,42 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	name 			:= person.Name
 	var age int
 	var gender,nationality string
-
 	chCnt := 0
 	ctx,_ := context.WithTimeout(ps.ctx,time.Second * 5)
 
 	go func(){
-		age,_ := ps.AgifySvc.MakeRequest(name)
+		age,err := ps.AgifySvc.MakeRequest(name)
+		if err != nil {
+			log.Error(err)
+		}
 		ageCh <- age
 	}()
 
 	go func(){
-		gender,_ := ps.GenderizeSvc.MakeRequest(name)
+		gender,err := ps.GenderizeSvc.MakeRequest(name)
+		if err != nil {
+			log.Error(err)
+		}
 		genderCh <- gender
 	}()
 	go func(){
-		nationality,_ := ps.NationalizeSvc.MakeRequest(name)
+		nationality,err := ps.NationalizeSvc.MakeRequest(name)
+		if err != nil {
+			log.Error(err)
+		}
 		nationalityCh <- nationality
 	}()
 loop:
 	for {
 		select {
 			case age = <- ageCh:
-				log.Info(age)
+				log.Info("age: ",age)
 				chCnt++
 			case gender = <- genderCh:
-				log.Info(gender)
+				log.Info("gender: ", gender)
 				chCnt++
 			case nationality = <- nationalityCh:
-				log.Info(nationality)
+				log.Info("nationality: ", nationality)
 				chCnt++
 			case <- ctx.Done():
 				return errors.New("Timeout")

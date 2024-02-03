@@ -3,6 +3,7 @@ package agify
 import (
 	"api/internal/helpers"
 	"github.com/goccy/go-json"
+	"errors"
 )
 
 type AgifyResponse struct {
@@ -28,6 +29,9 @@ func (a *Agify) MakeRequest(name string) (int,error){
 	}
 	if err := httpSender.SendRequestWithParams(params); err != nil {
 		return 0,err
+	}
+	if httpSender.ResCode < 200 || httpSender.ResCode >= 400 {
+		return 0,errors.New(httpSender.ResBody)
 	}
 	response := AgifyResponse{}
     json.Unmarshal([]byte(httpSender.ResBody), &response)

@@ -24,12 +24,12 @@ func New(cfg *cfg.AppConf) *Api{
 
 func (app *Api) Run() error{
 	ctx := context.TODO()
-	dbCtx,_ := context.WithTimeout(ctx,time.Second * 5)
+	dbCtx,cancel := context.WithTimeout(ctx,time.Second * 5)
+	defer cancel()
 	store, err := pg.New(dbCtx,app.cfg.DBUser,app.cfg.DBPass,app.cfg.DBHost,app.cfg.DBPort,app.cfg.DBName)
 	if err != nil {
 		return err
 	}
-
 
 	service := service.New(
 		store,

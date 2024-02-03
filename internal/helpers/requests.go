@@ -6,7 +6,7 @@ import (
 )
 
 type HTTPSender struct {
-	ResCode string
+	ResCode int
 	ResBody string
 	baseURL	string
 }
@@ -44,7 +44,7 @@ func (h *HTTPSender)SendRequestWithParams(params map[string]string) error{
 		return err
 	}
 
-	h.ResCode = resp.Status
+	h.ResCode = resp.StatusCode
 	h.ResBody = string(responseBody)
 	return nil
 }

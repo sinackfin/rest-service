@@ -3,6 +3,7 @@ package genderize
 import (
 	"api/internal/helpers"
 	"github.com/goccy/go-json"
+	"errors"
 )
 
 type Genderize struct {
@@ -29,6 +30,9 @@ func (g *Genderize) MakeRequest(name string) (string,error){
 	}
 	if err := httpSender.SendRequestWithParams(params); err != nil {
 		return "",err
+	}
+	if httpSender.ResCode < 200 || httpSender.ResCode >= 400 {
+		return "",errors.New(httpSender.ResBody)
 	}
 	response := GenderizeResponse{}
     json.Unmarshal([]byte(httpSender.ResBody), &response)
