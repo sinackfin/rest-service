@@ -1,15 +1,15 @@
 package httpsender
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
-	"context"
 )
 
 type HTTPSender struct {
 	ResCode int
 	ResBody string
-	baseURL	string
+	baseURL string
 }
 
 func New(url string) *HTTPSender {
@@ -18,18 +18,18 @@ func New(url string) *HTTPSender {
 	}
 }
 
-func (h *HTTPSender)SendRequestWithParams(ctx context.Context,params map[string]string) error{
+func (h *HTTPSender) SendRequestWithParams(ctx context.Context, params map[string]string) error {
 	client := &http.Client{}
-	req, err := http.NewRequestWithContext(ctx,http.MethodGet, h.baseURL, nil)
-	
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, h.baseURL, nil)
+
 	if err != nil {
 		return err
 	}
 
 	q := req.URL.Query()
-	
-	for i,v := range params {
-		q.Add(i,v)
+
+	for i, v := range params {
+		q.Add(i, v)
 	}
 
 	req.URL.RawQuery = q.Encode()
