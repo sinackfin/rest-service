@@ -5,6 +5,7 @@ import (
 	"api/internal/handler"
 	"api/internal/service"
 	"api/internal/store/pg"
+	"api/internal/utils"
 	"context"
 	"fmt"
 	"net/http"
@@ -21,9 +22,19 @@ func New(cfg *cfg.AppConf) *Api {
 
 func (app *Api) Run() error {
 	ctx := context.TODO()
+
+	dbConnStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		app.cfg.DBUser,
+		app.cfg.DBPass,
+		app.cfg.DBHost,
+		app.cfg.DBPort,
+		app.cfg.DBName)
+	if err := utils.RunMigrate(dbConnStr); err != nil {
+		return err
+	}
 	dbCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
-	store, err := pg.New(dbCtx, app.cfg.DBUser, app.cfg.DBPass, app.cfg.DBHost, app.cfg.DBPort, app.cfg.DBName)
+	store, err := pg.New(dbCtx, dbConnStr)
 	if err != nil {
 		return err
 	}

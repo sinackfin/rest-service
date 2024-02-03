@@ -3,7 +3,6 @@ package pg
 import (
 	"api/internal/models"
 	"context"
-	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -11,8 +10,7 @@ type PGStore struct {
 	pgxpool *pgxpool.Pool
 }
 
-func New(ctx context.Context, DBUser, DBPass, DBHost, DBPort, DBName string) (*PGStore, error) {
-	dbConnStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DBUser, DBPass, DBHost, DBPort, DBName)
+func New(ctx context.Context, dbConnStr string) (*PGStore, error) {
 	pgxpool, err := pgxpool.New(ctx, dbConnStr)
 	if err != nil {
 		return nil, err

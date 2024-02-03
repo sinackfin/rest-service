@@ -18,17 +18,17 @@ func main() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Error("Error reading config file, %s", err)
+		log.Error("Error reading config file: ", err)
 		return
 	}
 	if err := viper.Unmarshal(&appCfg); err != nil {
-		log.Error("Error Unmarshal AppConf, %s", err)
+		log.Error("Error Unmarshal AppConf: ", err)
 		return
 	}
 
 	api := api.New(&appCfg)
 
 	if err := api.Run(); err != nil {
-		log.Error("Error running app, %s", err)
+		log.Error("Error running app: ", err)
 	}
 }
