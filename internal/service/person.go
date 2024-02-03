@@ -40,12 +40,13 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	var age int
 	var gender,nationality string
 	chCnt := 0
-	ctx,_ := context.WithTimeout(ps.ctx,time.Second * 5)
+	ctx,cancel := context.WithTimeout(ps.ctx,time.Second * 5)
 
 	go func(){
 		age,err := ps.AgifySvc.MakeRequest(name)
 		if err != nil {
 			log.Error(err)
+			cancel()
 		}
 		ageCh <- age
 	}()
@@ -54,6 +55,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 		gender,err := ps.GenderizeSvc.MakeRequest(name)
 		if err != nil {
 			log.Error(err)
+			cancel()
 		}
 		genderCh <- gender
 	}()
@@ -61,6 +63,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 		nationality,err := ps.NationalizeSvc.MakeRequest(name)
 		if err != nil {
 			log.Error(err)
+			cancel()
 		}
 		nationalityCh <- nationality
 	}()
@@ -77,7 +80,7 @@ loop:
 				log.Info("nationality: ", nationality)
 				chCnt++
 			case <- ctx.Done():
-				return errors.New("Timeout")
+				return errors.New("Context canceled")
 			default:
 				if chCnt == 3{
 					break loop
