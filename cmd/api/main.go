@@ -11,8 +11,7 @@ import (
 func main(){
 	log.SetFormatter(&log.JSONFormatter{})
 
-	var appCfg config.Config
-	var pgConf config.PGStoreConfg
+	var appCfg config.AppConf
 
     viper.AddConfigPath(".")
     viper.SetConfigName(".env")
@@ -28,11 +27,6 @@ func main(){
 		return
 	}
 
-	if err := viper.Unmarshal(&pgConf); err != nil {
-        log.Error("Error Unmarshal DBConf, %s", err)
-		return
-	}
-	appCfg.PgConf = &pgConf
 	api := api.New(&appCfg)
 
 	if err := api.Run(); err != nil {

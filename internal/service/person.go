@@ -2,7 +2,6 @@ package service
 
 import (
 	"api/internal/store"
-	"api/internal/config"
 	"api/internal/models"
 	"api/internal/clients/agify"
 	"api/internal/clients/genderize"
@@ -11,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus" 
 	"errors"
     "github.com/google/uuid"
+	"context"
 )
 
 type PersonService struct {
@@ -18,14 +18,16 @@ type PersonService struct {
 	AgifySvc		*agify.Agify
 	GenderizeSvc	*genderize.Genderize
 	NationalizeSvc	*nationalize.Nationalize
+	ctx				context.Context
 }
 
-func New(cfg *config.ServiceConfig) *PersonService{
+func New(store store.IStore, agify *agify.Agify, gender *genderize.Genderize, nationality *nationalize.Nationalize, ctx context.Context) *PersonService{
 	return &PersonService{
-		Store: 			cfg.Store,
-		AgifySvc:		cfg.Agify,
-		GenderizeSvc:	cfg.Genderize,
-		NationalizeSvc:	cfg.Nationalize,
+		Store: 			store,
+		AgifySvc:		agify,
+		GenderizeSvc:	gender,
+		NationalizeSvc:	nationality,
+		ctx:			ctx,	
 	}
 }
 
@@ -39,7 +41,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	var gender,nationality string
 
 	chCnt := 0
-	t := time.NewTimer(5 * time.Second)
+	ctx,_ := context.WithTimeout(ps.ctx,time.Second * 5)
 
 	go func(){
 		age,_ := ps.AgifySvc.MakeRequest(name)
@@ -66,7 +68,7 @@ loop:
 			case nationality = <- nationalityCh:
 				log.Info(nationality)
 				chCnt++
-			case <- t.C:
+			case <- ctx.Done():
 				return errors.New("Timeout")
 			default:
 				if chCnt == 3{
@@ -90,7 +92,7 @@ func (ps *PersonService) CreatePerson(person *models.Person) error {
 	if err := person.Validate(); err != nil {
 		return err
 	}
-	if err := ps.Store.CreatePerson(person); err != nil {
+	if err := ps.Store.CreatePerson(ps.ctx,person); err != nil {
 		return err
 	}
 	return nil
@@ -100,7 +102,7 @@ func (ps *PersonService) CreatePerson(person *models.Person) error {
 
 func (ps *PersonService) GetPerson(id string) (*models.Person,error) {
 
-	person,err := ps.Store.GetPersonByID(id)
+	person,err := ps.Store.GetPersonByID(ps.ctx,id)
 	if err != nil {
 		log.Error(err)
 		return nil,errors.New("Internal error")
@@ -109,7 +111,7 @@ func (ps *PersonService) GetPerson(id string) (*models.Person,error) {
 }
 
 func (ps *PersonService) DeletePerson(id string) error {
-	if err := ps.Store.DeletePersonByID(id); err != nil {
+	if err := ps.Store.DeletePersonByID(ps.ctx,id); err != nil {
 		log.Error(err)
 		return errors.New("Internal error")
 	}
@@ -123,7 +125,7 @@ func (ps *PersonService) UpdatePerson(updated_person *models.Person) error {
 	if err := updated_person.Validate(); err != nil {
 		return err
 	}
-	if err := ps.Store.UpdatePerson(updated_person); err != nil {
+	if err := ps.Store.UpdatePerson(ps.ctx,updated_person); err != nil {
 		return err
 	}
 	return nil

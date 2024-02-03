@@ -15,29 +15,29 @@ import (
 )
 
 type Api struct {
-	cfg	*cfg.Config
+	cfg	*cfg.AppConf
 }
 
-func New(cfg *cfg.Config) *Api{
+func New(cfg *cfg.AppConf) *Api{
 	return &Api{cfg}
 }
 
 func (app *Api) Run() error{
-	ctx := context.Background()
-	store, err := pg.New(ctx,app.cfg.PgConf)
-	
+	ctx := context.TODO()
+	dbCtx,_ := context.WithTimeout(ctx,time.Second * 5)
+	store, err := pg.New(dbCtx,app.cfg.DBUser,app.cfg.DBPass,app.cfg.DBHost,app.cfg.DBPort,app.cfg.DBName)
 	if err != nil {
 		return err
 	}
 
-	serviceCfg := &cfg.ServiceConfig{
-		store,
-		nationalize.New(app.cfg.NatoinalizeAPI_URL),
-		genderize.New(app.cfg.GenderizeAPI_URL),
-		agify.New(app.cfg.AgifyAPI_URL),
-	}
 
-	service := service.New(serviceCfg)
+	service := service.New(
+		store,
+		agify.New(app.cfg.AgifyAPI_URL),
+		genderize.New(app.cfg.GenderizeAPI_URL),
+		nationalize.New(app.cfg.NatoinalizeAPI_URL),
+		ctx,
+	)
 	handler := handler.New(service)
 
 	s := &http.Server{
