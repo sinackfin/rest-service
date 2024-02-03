@@ -15,18 +15,18 @@ import (
 
 type PersonService struct {
 	Store 			store.IStore
-	AgifySvc		*agify.Agify
-	GenderizeSvc	*genderize.Genderize
-	NationalizeSvc	*nationalize.Nationalize
+	AgifyAPI		*agify.Agify
+	GenderizeAPI	*genderize.Genderize
+	NationalizeAPI	*nationalize.Nationalize
 	ctx				context.Context
 }
 
-func New(store store.IStore, agify *agify.Agify, gender *genderize.Genderize, nationality *nationalize.Nationalize, ctx context.Context) *PersonService{
+func NewPersonService(store store.IStore, agifyURL , genderURL , nationalityURL string, ctx context.Context) *PersonService{
 	return &PersonService{
 		Store: 			store,
-		AgifySvc:		agify,
-		GenderizeSvc:	gender,
-		NationalizeSvc:	nationality,
+		AgifyAPI:		agify.New(agifyURL),
+		GenderizeAPI:	genderize.New(genderURL),
+		NationalizeAPI:	nationalize.New(nationalityURL),
 		ctx:			ctx,	
 	}
 }
@@ -43,7 +43,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	ctx,cancel := context.WithTimeout(ps.ctx,time.Second * 5)
 
 	go func(){
-		age,err := ps.AgifySvc.MakeRequest(ctx,name)
+		age,err := ps.AgifyAPI.MakeRequest(ctx,name)
 		if err != nil {
 			log.Error(err)
 			cancel()
@@ -52,7 +52,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	}()
 
 	go func(){
-		gender,err := ps.GenderizeSvc.MakeRequest(ctx,name)
+		gender,err := ps.GenderizeAPI.MakeRequest(ctx,name)
 		if err != nil {
 			log.Error(err)
 			cancel()
@@ -60,7 +60,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 		genderCh <- gender
 	}()
 	go func(){
-		nationality,err := ps.NationalizeSvc.MakeRequest(ctx,name)
+		nationality,err := ps.NationalizeAPI.MakeRequest(ctx,name)
 		if err != nil {
 			log.Error(err)
 			cancel()

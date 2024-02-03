@@ -5,9 +5,6 @@ import (
 	"api/internal/handler"
 	"api/internal/service"
 	"api/internal/store/pg"
-	"api/internal/clients/agify"
-	"api/internal/clients/nationalize"
-	"api/internal/clients/genderize"
 	"fmt"
 	"net/http"
 	"time"
@@ -31,14 +28,14 @@ func (app *Api) Run() error{
 		return err
 	}
 
-	service := service.New(
+	personService := service.NewPersonService(
 		store,
-		agify.New(app.cfg.AgifyAPI_URL),
-		genderize.New(app.cfg.GenderizeAPI_URL),
-		nationalize.New(app.cfg.NatoinalizeAPI_URL),
+		app.cfg.AgifyAPI_URL,
+		app.cfg.GenderizeAPI_URL,
+		app.cfg.NatoinalizeAPI_URL,
 		ctx,
 	)
-	handler := handler.New(service)
+	handler := handler.New(personService)
 
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d",app.cfg.AppPort),
