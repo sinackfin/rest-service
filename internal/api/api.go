@@ -28,7 +28,7 @@ func (app *Api) Run() error{
 		return err
 	}
 
-	personService := service.NewPersonService(
+	personService := service.NewPerson(
 		store,
 		app.cfg.AgifyAPI_URL,
 		app.cfg.GenderizeAPI_URL,

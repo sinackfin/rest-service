@@ -21,7 +21,7 @@ type PersonService struct {
 	ctx				context.Context
 }
 
-func NewPersonService(store store.IStore, agifyURL , genderURL , nationalityURL string, ctx context.Context) *PersonService{
+func NewPerson(store store.IStore, agifyURL , genderURL , nationalityURL string, ctx context.Context) *PersonService{
 	return &PersonService{
 		Store: 			store,
 		AgifyAPI:		agify.New(agifyURL),
