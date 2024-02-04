@@ -7,28 +7,33 @@ import (
 	"api/internal/helpers/http"
 	"errors"
 	"github.com/goccy/go-json"
+	"context"
 )
 
 type HTTPClientMock struct{}
 
-func New(url string) *HTTPClientMock {
+func New() *HTTPClientMock {
 	return &HTTPClientMock{}
 }
 
-func (h *HTTPClientMock) GetWithParams(ctx context.Context, params map[string]string) (*httpClient.HTTPResponse, error) {
-	if !ok {
-		return nil, errors.New("Not define name field")
-	}
+func (h *HTTPClientMock) GetWithParams(ctx context.Context, url string, params map[string]string) (*httpClient.HTTPResponse, error) {
 	reponse := &httpClient.HTTPResponse{}
-	switch h.baseURL {
+	if params["name"] != "test" {
+		return nil,errors.New("Not found")
+	}
+	switch url {
 	case "agifyTest":
 		agifyResp := agify.AgifyResponse{
 			1,
 			100,
 			"test",
 		}
+		marshalBody, err := json.Marshal(agifyResp)
+		if err != nil {
+			return nil, err
+		}
 		reponse.ResCode = 200
-		reponse.ResBody = json.Marshal(agifyResp)
+		reponse.ResBody = string(marshalBody)
 	case "genderizeTest":
 		genderizeResp := genderize.GenderizeResponse{
 			1,
@@ -36,8 +41,12 @@ func (h *HTTPClientMock) GetWithParams(ctx context.Context, params map[string]st
 			"male",
 			"test",
 		}
+		marshalBody, err := json.Marshal(genderizeResp)
+		if err != nil {
+			return nil, err
+		}
 		reponse.ResCode = 200
-		reponse.ResBody = json.Marshal(genderizeResp)
+		reponse.ResBody = string(marshalBody)
 	case "nationalizeTest":
 		nationalizeResp := nationalize.NationalizeResponse{
 			2,
@@ -45,16 +54,20 @@ func (h *HTTPClientMock) GetWithParams(ctx context.Context, params map[string]st
 			[]nationalize.CountryProbability{
 				{
 					ID: "RU",
-					0.2,
+					Probability: 0.2,
 				},
 				{
 					ID: "US",
-					0.1,
+					Probability: 0.1,
 				},
 			},
 		}
+		marshalBody, err := json.Marshal(nationalizeResp)
+		if err != nil {
+			return nil, err
+		}
 		reponse.ResCode = 200
-		reponse.ResBody = json.Marshal(nationalizeResp)
+		reponse.ResBody = string(marshalBody)
 	default:
 		return nil, errors.New("Error API URL")
 	}
