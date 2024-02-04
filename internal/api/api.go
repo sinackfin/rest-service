@@ -1,8 +1,12 @@
 package api
 
 import (
+	"api/internal/clients/agify"
+	"api/internal/clients/genderize"
+	"api/internal/clients/nationalize"
 	cfg "api/internal/config"
 	"api/internal/handler"
+	"api/internal/helpers/http"
 	"api/internal/service"
 	"api/internal/store/pg"
 	"api/internal/utils"
@@ -38,13 +42,18 @@ func (app *Api) Run() error {
 	if err != nil {
 		return err
 	}
-
+	if app.cfg.Seeds {
+		if err := store.PersonSeeds(ctx); err != nil {
+			return err
+		}
+	}
+	httpClient := httpClient.New()
 	personService := service.NewPerson(
-		store,
-		app.cfg.AgifyAPI_URL,
-		app.cfg.GenderizeAPI_URL,
-		app.cfg.NatoinalizeAPI_URL,
 		ctx,
+		store,
+		agify.New(app.cfg.AgifyAPI_URL, httpClient),
+		genderize.New(app.cfg.GenderizeAPI_URL, httpClient),
+		nationalize.New(app.cfg.NatoinalizeAPI_URL, httpClient),
 	)
 	handler := handler.New(personService)
 

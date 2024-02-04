@@ -1,14 +1,15 @@
 package genderize
 
 import (
-	"api/internal/helpers"
+	"api/internal/helpers/http"
 	"context"
 	"errors"
 	"github.com/goccy/go-json"
 )
 
-type Genderize struct {
-	URL string
+type GenderizeAPI struct {
+	URL        string
+	httpClient httpClient.IHttpClient
 }
 
 type GenderizeResponse struct {
@@ -18,24 +19,25 @@ type GenderizeResponse struct {
 	Name        string `json:"name"`
 }
 
-func New(url string) *Genderize {
-	return &Genderize{
-		URL: url,
+func New(url string, httpClient httpClient.IHttpClient) *GenderizeAPI {
+	return &GenderizeAPI{
+		url,
+		httpClient,
 	}
 }
 
-func (g *Genderize) MakeRequest(ctx context.Context, name string) (string, error) {
-	httpSender := httpsender.New(g.URL)
+func (g *GenderizeAPI) GetGenderByName(ctx context.Context, name string) (string, error) {
 	params := map[string]string{
 		"name": name,
 	}
-	if err := httpSender.SendRequestWithParams(ctx, params); err != nil {
+	resp, err := g.httpClient.GetWithParams(ctx, g.URL, params)
+	if err != nil {
 		return "", err
 	}
-	if httpSender.ResCode < 200 || httpSender.ResCode >= 400 {
-		return "", errors.New(httpSender.ResBody)
+	if resp.ResCode < 200 || resp.ResCode >= 400 {
+		return "", errors.New(resp.ResBody)
 	}
 	response := GenderizeResponse{}
-	json.Unmarshal([]byte(httpSender.ResBody), &response)
+	json.Unmarshal([]byte(resp.ResBody), &response)
 	return response.Gender, nil
 }

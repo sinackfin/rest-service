@@ -10,4 +10,5 @@ type IStore interface {
 	CreatePerson(ctx context.Context, person *models.Person) error
 	UpdatePerson(ctx context.Context, person *models.Person) error
 	DeletePersonByID(ctx context.Context, id string) error
+	PersonSeeds(ctx context.Context) error
 }

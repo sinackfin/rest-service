@@ -3,6 +3,7 @@ package config
 type AppConf struct {
 	AppPort       uint `mapstructure:"APP_PORT"`
 	DBConnTimeout uint `mapstructure:"DB_CONN_TIMEOUT"`
+	Seeds         bool `mapstructure:"DB_SEEDS"`
 	//**************external API*****************//
 	NatoinalizeAPI_URL string `mapstructure:"NATIONALITY_API_URL"`
 	GenderizeAPI_URL   string `mapstructure:"GENDERIZE_API_URL"`

@@ -1,11 +1,16 @@
 package agify
 
 import (
-	"api/internal/helpers"
+	"api/internal/helpers/http"
 	"context"
 	"errors"
 	"github.com/goccy/go-json"
 )
+
+type AgifyApi struct {
+	URL        string
+	httpClient httpClient.IHttpClient
+}
 
 type AgifyResponse struct {
 	Count int    `json:"count"`
@@ -13,28 +18,25 @@ type AgifyResponse struct {
 	Name  string `json:"name"`
 }
 
-type Agify struct {
-	URL string
-}
-
-func New(url string) *Agify {
-	return &Agify{
-		URL: url,
+func New(url string, httpClient httpClient.IHttpClient) *AgifyApi {
+	return &AgifyApi{
+		url,
+		httpClient,
 	}
 }
 
-func (a *Agify) MakeRequest(ctx context.Context, name string) (int, error) {
-	httpSender := httpsender.New(a.URL)
+func (a *AgifyApi) GetAgeByName(ctx context.Context, name string) (int, error) {
 	params := map[string]string{
 		"name": name,
 	}
-	if err := httpSender.SendRequestWithParams(ctx, params); err != nil {
+	resp, err := a.httpClient.GetWithParams(ctx, a.URL, params)
+	if err != nil {
 		return 0, err
 	}
-	if httpSender.ResCode < 200 || httpSender.ResCode >= 400 {
-		return 0, errors.New(httpSender.ResBody)
+	if resp.ResCode < 200 || resp.ResCode >= 400 {
+		return 0, errors.New(resp.ResBody)
 	}
 	response := AgifyResponse{}
-	json.Unmarshal([]byte(httpSender.ResBody), &response)
+	json.Unmarshal([]byte(resp.ResBody), &response)
 	return response.Age, nil
 }

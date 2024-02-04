@@ -15,18 +15,23 @@ import (
 
 type PersonService struct {
 	Store          store.IStore
-	AgifyAPI       *agify.Agify
-	GenderizeAPI   *genderize.Genderize
-	NationalizeAPI *nationalize.Nationalize
+	AgifyAPI       *agify.AgifyApi
+	GenderizeAPI   *genderize.GenderizeAPI
+	NationalizeAPI *nationalize.NationalizeAPI
 	ctx            context.Context
 }
 
-func NewPerson(store store.IStore, agifyURL, genderURL, nationalityURL string, ctx context.Context) *PersonService {
+func NewPerson(
+	ctx context.Context,
+	store store.IStore,
+	agifyURL *agify.AgifyApi,
+	genderURL *genderize.GenderizeAPI,
+	nationalityURL *nationalize.NationalizeAPI) *PersonService {
 	return &PersonService{
 		Store:          store,
-		AgifyAPI:       agify.New(agifyURL),
-		GenderizeAPI:   genderize.New(genderURL),
-		NationalizeAPI: nationalize.New(nationalityURL),
+		AgifyAPI:       agifyURL,
+		GenderizeAPI:   genderURL,
+		NationalizeAPI: nationalityURL,
 		ctx:            ctx,
 	}
 }
@@ -42,7 +47,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	ctx, cancel := context.WithTimeout(ps.ctx, time.Second*5)
 
 	go func() {
-		age, err := ps.AgifyAPI.MakeRequest(ctx, name)
+		age, err := ps.AgifyAPI.GetAgeByName(ctx, name)
 		if err != nil {
 			log.Error(err)
 			cancel()
@@ -51,7 +56,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 	}()
 
 	go func() {
-		gender, err := ps.GenderizeAPI.MakeRequest(ctx, name)
+		gender, err := ps.GenderizeAPI.GetGenderByName(ctx, name)
 		if err != nil {
 			log.Error(err)
 			cancel()
@@ -59,7 +64,7 @@ func (ps *PersonService) ActuatePerson(person *models.Person) error {
 		genderCh <- gender
 	}()
 	go func() {
-		nationality, err := ps.NationalizeAPI.MakeRequest(ctx, name)
+		nationality, err := ps.NationalizeAPI.GetNationalityByName(ctx, name)
 		if err != nil {
 			log.Error(err)
 			cancel()
